@@ -51,6 +51,7 @@ bundle config set --local path 'vendor'
 bundle install
 bundle exec ruby pages-to-json.rb  # Generates the json extraction.
 bundle exec ruby json-to-sqlite.rb  # Puts it all in an sqlite DB
+bundle exec ruby json-to-csv.rb  # Puts all json data into csv file. Has both jyutping and yale romanizations.
 bundle exec ruby make-dict.rb  # Creates kobo file with all entries. Use -h to see entry filter options.
 bundle exec ruby make-dict.rb  -j # Creates kindle file with all entries. Use -h to see entry filter options.
 ```
