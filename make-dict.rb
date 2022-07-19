@@ -181,7 +181,7 @@ HEREDOC
 EntryStart =<<HEREDOC
 <idx:entry name="cantodict" scriptable="yes" spell="yes">
 <idx:short><a id="%{id}"></a>
-<idx:orth value="%{headword}">%{short_description}
+<idx:orth value="%{headword}">%{headword} - %{short_description}
 HEREDOC
 
 EntryEnd =<<HEREDOC
@@ -212,8 +212,8 @@ def get_dict_data(definition_join_char_, attribute_join_char_)
       next if (not @options[:incomplete]) && incomplete == 1
 
       romanization = @conv.convert_line(jyutping, target_romanization)
-      short_description = "#{chinese}: <i>#{romanization}</i>"
-      short_description += " [拼 <i>#{pinyin}</i>]" if pinyin
+      short_description = "#{romanization}"
+      short_description += " [拼 #{pinyin}]" if pinyin
       short_description += " #{radical}" if radical
       short_description += " [粵]" if dialect == 'cantonese-only'
       short_description += " [國]" if dialect == 'mandarin-or-written-only'
@@ -278,7 +278,7 @@ def make_kobo_dictfile(entries)
   File.open(filename, "w") do |f|
     entries.each do |entry|
       f.puts("@#{entry[:headword]}")
-      f.puts(entry[:short_description])
+      f.puts(":" + entry[:short_description])
       variants = entry[:variants]
       variants.each { |v| f.puts("&#{v}") } if variants and variants.size > 0
       f.puts(entry[:definition])
