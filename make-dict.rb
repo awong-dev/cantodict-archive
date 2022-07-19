@@ -195,7 +195,9 @@ HEREDOC
 
 def get_dict_data(definition_join_char_, attribute_join_char_)
   begin
-    db = SQLite3::Database.new ARGV[0]
+    dbfile = ARGV[0]
+    dbfile = 'output/cantodict.sqlite' unless dbfile
+    db = SQLite3::Database.new dbfile
     db.transaction
 
     entries = []
@@ -248,7 +250,7 @@ end
 
 def make_kindle_dir(entries)
   dictname = make_dictname()
-  directory_name = "output/kindle-#{dictname}"
+  directory_name = "output/#{dictname}/kindle-#{dictname}"
   Dir.mkdir(directory_name) unless File.exist?(directory_name)
 
   File.open(directory_name + "/copyright.html", "w") { |f| f.write(CopyrightHtml) }
@@ -272,7 +274,7 @@ end
 
 def make_kobo_dictfile(entries)
   dictname = make_dictname()
-  filename = "output/kobo-#{dictname}.df"
+  filename = "output/#{dictname}/kobo-#{dictname}.df"
   File.open(filename, "w") do |f|
     entries.each do |entry|
       f.puts("@#{entry[:headword]}")
