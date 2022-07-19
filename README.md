@@ -18,9 +18,14 @@ Given that Cantonese is a waning language and Cantodict provides a snapshot hist
 of usage, it feels important to preserve it. That veteran members of the project
 believe there is not a problem with a scrape, I'm repulbishing the data here.
 
-## Install
+## Install dn run
 ```
-bundle install --path vendor/bundle
+bundle config set --local path 'vendor'
+bundle install
+bundle exec ruby pages-to-json.rb  # Generates the json extraction.
+bundle exec ruby json-to-sqlite.rb  # Puts it all in an sqlite DB
+bundle exec ruby make-dict.rb  # Creates kobo file with all entries. Use -h to see entry filter options.
+bundle exec ruby make-dict.rb  -j # Creates kindle file with all entries. Use -h to see entry filter options.
 ```
 
 ## Tools created
