@@ -18,7 +18,34 @@ Given that Cantonese is a waning language and Cantodict provides a snapshot hist
 of usage, it feels important to preserve it. That veteran members of the project
 believe there is not a problem with a scrape, I'm repulbishing the data here.
 
-## Install dn run
+## Installing the dictionary
+Inside the `output` directory, there are 4 types of files:
+  * `cantodict-*` directories contain Kobo and Kindle friendly dictionary files with the cantodict data. Note the "yale" version *only* converted the initial romanization from jyutping to yale. Any romanization inside the defintiion is still jyutping as I couldn't find a fast way to separate those out to convert.
+  * `*.json` files include json dumps of the extracted content of the `data` directory.
+  * `cantodict.sqlite` is an sqlite database combining all the files. See `TABLE_CREATE_SQL` in `json-to-sqlite.rb` for a commented schema.
+  * `cantodict.csv` is a dump of `cantodict.sqlite` in csv format.
+
+To install the dictionaries on Kobo or Kindle, you need to side-load them.
+
+### Dictionary variants.
+I prefer yale romanization so I created a variant of the dictinoary where the *primary* romanization presetned is in yale.
+
+The dictionary also has some set of incomplete items, and 205 items that were marked as "Vulgar" which some parents may not want to show to kids. Note...there are probably a number of vulgar terms that are NOT flagged, but this removes at least a large chunk of them.
+
+If you're uncertain what variant to use `cantodict-jyutping` is probably the one you want, or `cantodict-yale` if you don't know any romanization system as Yale is more natually readable to English speakers.
+
+Both the Kobo and Kindle versions of the dictionary should support looking up variants of characters/phrases includes simplified.
+
+### Installing dictinoary on a Kobo
+For Kobo, either use the [dictutil](https://github.com/pgaskin/dictutil) to copy the wanted variant of `dicthtml-zh_HK.zip` on to your device. Or to do it manually, copy it into the `.kobo/dict` directory on the device.
+
+For Kobo, you can only install one version of this dictionary easily since the filename is based on locale. If you want to install two variants, you could fake it by renaming files to zh_TW, zh_CN, etc.
+
+### Installing dictinoary on a Kindle.
+For a Kindle, it means copying the `.mobi` file for the variant of the dictionary you want into the `Documents` directory of your Kindle.
+
+
+## Running the scripts to regenerate the output data.
 ```
 bundle config set --local path 'vendor'
 bundle install
