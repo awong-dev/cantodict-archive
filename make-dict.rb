@@ -37,7 +37,7 @@ CoverHtml = <<HEREDOC
   </head>
   <body>
     <h1>Cantodict (v. %s)</h1>
-    <h2>A Collaborative Dictionary of Cantonese from https://www.cantonese.sheik.co.uk/</h2>
+    <h2>A Collaborative Dictionary of Cantonese from <a href="https://www.cantonese.sheik.co.uk/">https://www.cantonese.sheik.co.uk/</a></h2>
     <h3>Created by Cantodict editors over the years</h3>
   </body>
 </html>
@@ -50,7 +50,7 @@ CopyrightHtml = <<HEREDOC
   </head>
   <body>
     <h1>Copyright</h1>
-    <h3>Cantodict editors from https://www.cantonese.sheik.co.uk/</h3>
+    <h3>Cantodict editors from <a href="https://www.cantonese.sheik.co.uk/">https://www.cantonese.sheik.co.uk/</a></h3>
     <ul>
       <li>bybell -- 36397</li>
       <li>tym -- 7297</li>
@@ -193,7 +193,7 @@ HEREDOC
 
 @conv = Converter.new(6)
 
-def get_dict_data(definition_join_char_, attribute_join_char_)
+def get_dict_data()
   begin
     dbfile = ARGV[0]
     dbfile = 'output/cantodict.sqlite' unless dbfile
@@ -212,23 +212,24 @@ def get_dict_data(definition_join_char_, attribute_join_char_)
       next if (not @options[:incomplete]) && incomplete == 1
 
       romanization = @conv.convert_line(jyutping, target_romanization)
-      short_description = "#{romanization}"
-      short_description += " [拼 #{pinyin}]" if pinyin
-      short_description += " #{radical}" if radical
+      short_description = "<i>#{romanization}</i>"
+      short_description += " [拼 <i>#{pinyin}</i>]" unless pinyin.empty?
+      short_description += " 部:#{radical}" unless (radical.nil? or radical.empty?)
       short_description += " [粵]" if dialect == 'cantonese-only'
       short_description += " [國]" if dialect == 'mandarin-or-written-only'
       short_description += " INCOMPLETE" if incomplete == 1
 
       definition_lines = []
-      definition_lines << definition.gsub("\r","").strip
-      definition_lines << notes.gsub("\r","").strip if notes
+      definition_lines << definition.gsub("\r\n","<br />").strip.gsub("\n", "<br />")
+      definition_lines << notes.gsub("\r\n","<br />").strip.gsub("\n", "<br />") if notes
       definition_body = definition_lines.join("<br />")
 
       attributes = []
-      attributes << "Pos: #{pos.strip} " unless pos.strip.empty?
-      attributes << "strokes: #{stroke_count} " if stroke_count
-      attributes << "Similar: #{similar} " if similar and not similar.split(',').empty?
-      definition_body += attributes.join("<br />") unless attributes.empty?
+      attributes << "<b>Pos:</b> #{pos.strip} " unless pos.strip.empty?
+      attributes << "<b>Strokes:</b> #{stroke_count} " if stroke_count
+      attributes << "<b>Variants:</b> #{variants} " unless variants.empty?
+      attributes << "<b>Similar:</b> #{similar} " unless similar.empty?
+      definition_body += "<br />" + attributes.join("<br />") unless attributes.empty?
 
       entries << {
         headword: chinese,
@@ -236,7 +237,6 @@ def get_dict_data(definition_join_char_, attribute_join_char_)
         variants: variants.split(','),
         short_description: short_description,
         definition: definition_body }
-
     end
 
     return entries
@@ -254,8 +254,8 @@ def make_kindle_dir(entries)
   Dir.mkdir(directory_name) unless File.exist?(directory_name)
 
   File.open(directory_name + "/copyright.html", "w") { |f| f.write(CopyrightHtml) }
-  File.open(directory_name + "/cover.html", "w") { |f| f.write(CoverHtml % dictname) }
-  File.open(directory_name + "/cantodict.opf", "w") { |f| f.write(CantodictOpf % dictname) }
+  File.open(directory_name + "/cover.html", "w") { |f| f.write(CoverHtml % dictname.sub("cantodict-","")) }
+  File.open(directory_name + "/cantodict.opf", "w") { |f| f.write(CantodictOpf % dictname.sub("cantodict-","")) }
   File.open(directory_name + "/content.html", "w") do |f|
     f.print DictionaryStart
     entries.each do |entry|
@@ -278,19 +278,19 @@ def make_kobo_dictfile(entries)
   File.open(filename, "w") do |f|
     entries.each do |entry|
       f.puts("@#{entry[:headword]}")
-      f.puts(":" + entry[:short_description])
+      f.puts(": - #{entry[:short_description]}")
       variants = entry[:variants]
       variants.each { |v| f.puts("&#{v}") } if variants and variants.size > 0
+      f.print("<html>")
       f.puts(entry[:definition])
-      f.puts("Cantodict id: #{entry[:id]}")
+      f.puts("<br /><b>Cantodict id:</b> #{entry[:id]}")
     end
   end
 end
 
+entries = get_dict_data
 if @options[:format] == :kobo
-  entries = get_dict_data("\n", " ")
   make_kobo_dictfile(entries)
 elsif @options[:format] == :kindle
-  entries = get_dict_data("<br />", "<br />")
   make_kindle_dir(entries)
 end
